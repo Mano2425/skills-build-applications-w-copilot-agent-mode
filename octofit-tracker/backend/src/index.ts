@@ -13,10 +13,13 @@ const app = express();
 app.use(express.json());
 
 // Codespaces-aware API URL support
-const API_URL = process.env.API_URL || (process.env.CODESPACE_NAME ? `https://${process.env.CODESPACE_NAME}.githubpreview.dev` : `http://localhost:${PORT}`);
+// Prefer explicit API_URL env var; otherwise when running in Codespaces use the
+// pattern: https://$CODESPACE_NAME-8000.app.github.dev (GitHub Codespaces preview)
+const API_URL = process.env.API_URL || (process.env.CODESPACE_NAME ? `https://${process.env.CODESPACE_NAME}-8000.app.github.dev` : `http://localhost:${PORT}`);
 
-// Simple CORS handling: allow frontend origin if provided, else allow all
-const FRONTEND_URL = process.env.FRONTEND_URL || (process.env.CODESPACE_NAME ? `https://${process.env.CODESPACE_NAME}.githubpreview.dev` : '*');
+// Simple CORS handling: allow frontend origin if provided, else allow all. When
+// running in Codespaces expose the Codespaces preview host.
+const FRONTEND_URL = process.env.FRONTEND_URL || (process.env.CODESPACE_NAME ? `https://${process.env.CODESPACE_NAME}-5173.app.github.dev` : '*');
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', FRONTEND_URL === '*' ? '*' : FRONTEND_URL);
   res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
