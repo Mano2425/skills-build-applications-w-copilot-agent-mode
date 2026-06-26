@@ -1,24 +1,32 @@
 import { Router } from 'express';
+import Workout from '../models/Workout';
 
 const router = Router();
 
-router.get('/', (_req, res) => {
-  res.json({ message: 'List workouts (placeholder)', workouts: [] });
+router.get('/', async (_req, res) => {
+  const workouts = await Workout.find().lean();
+  res.json({ workouts });
 });
 
-router.post('/', (req, res) => {
-  res.status(201).json({ message: 'Create workout (placeholder)', payload: req.body });
+router.post('/', async (req, res) => {
+  const created = await Workout.create(req.body);
+  res.status(201).json({ workout: created });
 });
 
-router.get('/:id', (req, res) => {
-  res.json({ message: 'Get workout (placeholder)', id: req.params.id });
+router.get('/:id', async (req, res) => {
+  const workout = await Workout.findById(req.params.id).lean();
+  if (!workout) return res.status(404).json({ message: 'Not found' });
+  res.json({ workout });
 });
 
-router.put('/:id', (req, res) => {
-  res.json({ message: 'Update workout (placeholder)', id: req.params.id, payload: req.body });
+router.put('/:id', async (req, res) => {
+  const updated = await Workout.findByIdAndUpdate(req.params.id, req.body, { new: true }).lean();
+  if (!updated) return res.status(404).json({ message: 'Not found' });
+  res.json({ workout: updated });
 });
 
-router.delete('/:id', (req, res) => {
+router.delete('/:id', async (req, res) => {
+  await Workout.findByIdAndDelete(req.params.id);
   res.status(204).send();
 });
 

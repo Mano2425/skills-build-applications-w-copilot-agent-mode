@@ -1,24 +1,32 @@
 import { Router } from 'express';
+import User from '../models/User';
 
 const router = Router();
 
-router.get('/', (_req, res) => {
-  res.json({ message: 'List users (placeholder)', users: [] });
+router.get('/', async (_req, res) => {
+  const users = await User.find().lean();
+  res.json({ users });
 });
 
-router.post('/', (req, res) => {
-  res.status(201).json({ message: 'Create user (placeholder)', payload: req.body });
+router.post('/', async (req, res) => {
+  const created = await User.create(req.body);
+  res.status(201).json({ user: created });
 });
 
-router.get('/:id', (req, res) => {
-  res.json({ message: 'Get user (placeholder)', id: req.params.id });
+router.get('/:id', async (req, res) => {
+  const user = await User.findById(req.params.id).lean();
+  if (!user) return res.status(404).json({ message: 'Not found' });
+  res.json({ user });
 });
 
-router.put('/:id', (req, res) => {
-  res.json({ message: 'Update user (placeholder)', id: req.params.id, payload: req.body });
+router.put('/:id', async (req, res) => {
+  const updated = await User.findByIdAndUpdate(req.params.id, req.body, { new: true }).lean();
+  if (!updated) return res.status(404).json({ message: 'Not found' });
+  res.json({ user: updated });
 });
 
-router.delete('/:id', (req, res) => {
+router.delete('/:id', async (req, res) => {
+  await User.findByIdAndDelete(req.params.id);
   res.status(204).send();
 });
 

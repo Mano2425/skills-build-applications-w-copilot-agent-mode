@@ -1,24 +1,32 @@
 import { Router } from 'express';
+import Activity from '../models/Activity';
 
 const router = Router();
 
-router.get('/', (_req, res) => {
-  res.json({ message: 'List activities (placeholder)', activities: [] });
+router.get('/', async (_req, res) => {
+  const activities = await Activity.find().populate('user').lean();
+  res.json({ activities });
 });
 
-router.post('/', (req, res) => {
-  res.status(201).json({ message: 'Create activity (placeholder)', payload: req.body });
+router.post('/', async (req, res) => {
+  const created = await Activity.create(req.body);
+  res.status(201).json({ activity: created });
 });
 
-router.get('/:id', (req, res) => {
-  res.json({ message: 'Get activity (placeholder)', id: req.params.id });
+router.get('/:id', async (req, res) => {
+  const activity = await Activity.findById(req.params.id).populate('user').lean();
+  if (!activity) return res.status(404).json({ message: 'Not found' });
+  res.json({ activity });
 });
 
-router.put('/:id', (req, res) => {
-  res.json({ message: 'Update activity (placeholder)', id: req.params.id, payload: req.body });
+router.put('/:id', async (req, res) => {
+  const updated = await Activity.findByIdAndUpdate(req.params.id, req.body, { new: true }).lean();
+  if (!updated) return res.status(404).json({ message: 'Not found' });
+  res.json({ activity: updated });
 });
 
-router.delete('/:id', (req, res) => {
+router.delete('/:id', async (req, res) => {
+  await Activity.findByIdAndDelete(req.params.id);
   res.status(204).send();
 });
 
